@@ -1,17 +1,16 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from time import sleep
 
-driver = webdriver.Chrome()
 #setting options to open incognito window
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument("--incognito")
 driver = webdriver.Chrome(chrome_options=chrome_options)
-
 
 phone = '01772836280'
 password = 'Mememe198$'
@@ -98,6 +97,7 @@ def login_from_login_page():
     login_btn.click()
 
 def login_from_nav_bar(phone,password):
+    sleep(2)
     #opening login menu
     login_svg = driver.find_element_by_xpath('//*[@d="M858.5 763.6a374 374 0 0 0-80.6-119.5 375.63 375.63 0 0 0-119.5-80.6c-.4-.2-.8-.3-1.2-.5C719.5 518 760 444.7 760 362c0-137-111-248-248-248S264 225 264 362c0 82.7 40.5 156 102.8 201.1-.4.2-.8.3-1.2.5-44.8 18.9-85 46-119.5 80.6a375.63 375.63 0 0 0-80.6 119.5A371.7 371.7 0 0 0 136 901.8a8 8 0 0 0 8 8.2h60c4.4 0 7.9-3.5 8-7.8 2-77.2 33-149.5 87.8-204.3 56.7-56.7 132-87.9 212.2-87.9s155.5 31.2 212.2 87.9C779 752.7 810 825 812 902.2c.1 4.4 3.6 7.8 8 7.8h60a8 8 0 0 0 8-8.2c-1-47.8-10.9-94.3-29.5-138.2zM512 534c-45.9 0-89.1-17.9-121.6-50.4S340 407.9 340 362c0-45.9 17.9-89.1 50.4-121.6S466.1 190 512 190s89.1 17.9 121.6 50.4S684 316.1 684 362c0 45.9-17.9 89.1-50.4 121.6S557.9 534 512 534z"]/ancestor::button')
     login_svg.click()
@@ -112,19 +112,6 @@ def login_from_nav_bar(phone,password):
     login_btn.click()
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//span[text()="N"]')))
 
-def get_active_campaigns():
-    driver.find_element_by_tag_name('html').send_keys(Keys.HOME)
-    
-    burger_menu =  WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//button[@class="text-2xl menu"]')))
-    js_click(burger_menu)
-
-    campaigns = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//span[text()="Campaigns"]')))
-    js_click(campaigns)
-    # campaigns.click()
-
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//a[contains(@href,"/campaign/")]//*[text()="Live now"]/ancestor::a')))
-    live_campaigns_link = [campaign_link.get_attribute('href') for campaign_link in driver.find_elements_by_xpath('//a[contains(@href,"/campaign/")]//*[text()="Live now"]/ancestor::a')]
-    return live_campaigns_link
 
 def place_order(address,road):
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@d="M922.9 701.9H327.4l29.9-60.9 496.8-.9c16.8 0 31.2-12 34.2-28.6l68.8-385.1c1.8-10.1-.9-20.5-7.5-28.4a34.99 34.99 0 0 0-26.6-12.5l-632-2.1-5.4-25.4c-3.4-16.2-18-28-34.6-28H96.5a35.3 35.3 0 1 0 0 70.6h125.9L246 312.8l58.1 281.3-74.8 122.1a34.96 34.96 0 0 0-3 36.8c6 11.9 18.1 19.4 31.5 19.4h62.8a102.43 102.43 0 0 0-20.6 61.7c0 56.6 46 102.6 102.6 102.6s102.6-46 102.6-102.6c0-22.3-7.4-44-20.6-61.7h161.1a102.43 102.43 0 0 0-20.6 61.7c0 56.6 46 102.6 102.6 102.6s102.6-46 102.6-102.6c0-22.3-7.4-44-20.6-61.7H923c19.4 0 35.3-15.8 35.3-35.3a35.42 35.42 0 0 0-35.4-35.2zM305.7 253l575.8 1.9-56.4 315.8-452.3.8L305.7 253zm96.9 612.7c-17.4 0-31.6-14.2-31.6-31.6 0-17.4 14.2-31.6 31.6-31.6s31.6 14.2 31.6 31.6a31.6 31.6 0 0 1-31.6 31.6zm325.1 0c-17.4 0-31.6-14.2-31.6-31.6 0-17.4 14.2-31.6 31.6-31.6s31.6 14.2 31.6 31.6a31.6 31.6 0 0 1-31.6 31.6z"]/ancestor::button')))
@@ -158,44 +145,131 @@ def place_order(address,road):
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//p[contains(@title," ")]/ancestor::div[contains(@class,"overflow-hidden bg-white")]')))
 
 
+def order_products_seperately_from_champaign():
+    load_page('https://evaly.com.bd/')
+    driver.maximize_window()
+    login_from_nav_bar(phone,password)
+
+    #going to campaigns
+    for campaign in get_active_campaigns():
+        load_page(campaign)
+        #getting shops inside campaigns
+        shops = [shop_link.get_attribute('href') for shop_link in driver.find_elements_by_xpath('//div[contains(@class,"campaign__Grid")]/a')]
+        print(campaign)
+        #going to shops
+        for shop in shops:
+            bought_procuct_titles = []
+            load_page(shop)
+            print(f"Going to shop {shop}")
+            load_elements()
+            titles =[elem.text for elem in driver.find_elements_by_xpath('//p[contains(@title," ")]')]
+
+            reload_products = False
+            if len(titles)>=15:
+                reload_products = True
+
+            product_cards = driver.find_elements_by_xpath('//p[contains(@title," ")]/ancestor::div[contains(@class,"overflow-hidden bg-white")]')
+            order_no = 0
+            #ordering products saperately
+            for i in range(len(product_cards)):
+                buy_button = product_cards[i].find_element_by_tag_name('button')
+                title = product_cards[i].find_element_by_tag_name('p').text
+
+                if title in titles:
+                    print(f"Ordering {title}")
+                    js_click(buy_button)
+                    place_order(address,road)
+                    titles.remove(title)
+                    order_no+=1
+                    product_cards = driver.find_elements_by_xpath('//p[contains(@title," ")]/ancestor::div[contains(@class,"overflow-hidden bg-white")]')
+    print("\nSuccessfuly orderd all the products form all the champaigns seperately")
 
 
+def get_active_campaigns():
+    driver.find_element_by_tag_name('html').send_keys(Keys.HOME)
+    burger_menu_xpath =  '//button[@class="text-2xl menu"]'
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, burger_menu_xpath)))
+    # WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, burger_menu_xpath)))
+    driver.execute_script("""xpath = '{}';document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();""".format(burger_menu_xpath))
+    # js_click(burger_menu)
 
-load_page('https://evaly.com.bd/')
-driver.maximize_window()
-login_from_nav_bar(phone,password)
+    campaign_xpath = '//span[text()="Campaigns"]'
+    # WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, campaign_xpath)))
+    WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, campaign_xpath)))
+    campaign = driver.find_element_by_xpath(campaign_xpath)
+    driver.execute_script("""xpath = '{}';document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();""".format(campaign_xpath))
+    driver.execute_script("arguments[0].scrollIntoView();",campaign)
+    # js_click(campaigns)
+    
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//a[contains(@href,"/campaign/")]//*[text()="Live now"]/ancestor::a')))
+    live_campaigns_link = [campaign_link.get_attribute('href') for campaign_link in driver.find_elements_by_xpath('//a[contains(@href,"/campaign/")]//*[text()="Live now"]/ancestor::a')]
+    return live_campaigns_link
 
-#going to campaigns
-for campaign in get_active_campaigns():
-    load_page(campaign)
 
-    #getting shops inside campaigns
-    shops = [shop_link.get_attribute('href') for shop_link in driver.find_elements_by_xpath('//div[contains(@class,"campaign__Grid")]/a')]
-    print(campaign)
-    #going to shops
-    for shop in shops:
-        bought_procuct_titles = []
-        load_page(shop)
-        print(f"Going to shop {shop}")
-        load_elements()
-        titles =[elem.text for elem in driver.find_elements_by_xpath('//p[contains(@title," ")]')]
+def _filter_campaign(text):
+    valid = []
+    for link in get_active_campaigns():
+        if text.lower() in link:
+            valid.append(link)
+            print('match found :',valid)
+    return valid
+    
 
-        reload_products = False
-        if len(titles)>=15:
-            reload_products = True
+def _get_active_champaign_w_text(text):
+    campaign_w_text = _filter_campaign(text)
+    while len(campaign_w_text)<=0:
+        load_page('https://evaly.com.bd/')
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//button[@class="text-2xl menu"]')))
+        campaign_w_text = _filter_campaign(text)
+    print(campaign_w_text)
+    return campaign_w_text
 
-        product_cards = driver.find_elements_by_xpath('//p[contains(@title," ")]/ancestor::div[contains(@class,"overflow-hidden bg-white")]')
-        order_no = 0
-        #ordering products saperately
-        for i in range(len(product_cards)):
-            buy_button = product_cards[i].find_element_by_tag_name('button')
-            title = product_cards[i].find_element_by_tag_name('p').text
+def zoom_out(count=1):
+    html = driver.find_element_by_tag_name('body')
+    for i in range(count):
+        ActionChains(driver).key_down(Keys.CONTROL).send_keys(Keys.ADD).key_up(Keys.CONTROL).perform()
 
-            if title in titles:
-                print(f"Ordering {title}")
-                js_click(buy_button)
-                place_order(address,road)
-                titles.remove(title)
-                order_no+=1
-                product_cards = driver.find_elements_by_xpath('//p[contains(@title," ")]/ancestor::div[contains(@class,"overflow-hidden bg-white")]')
-print("\nSuccessfuly orderd all the products form all the champaigns seperately")
+def order_products_seperately_from_champaign_w_text(text=None):
+    load_page('https://evaly.com.bd/')
+    driver.maximize_window()
+    login_from_nav_bar(phone,password)
+    if text==None:
+        return
+
+    #going to campaigns
+    for campaign in _get_active_champaign_w_text(text):
+        load_page(campaign)
+        #getting shops inside campaigns
+        shops = [shop_link.get_attribute('href') for shop_link in driver.find_elements_by_xpath('//div[contains(@class,"campaign__Grid")]/a')]
+        
+        print(campaign)
+        #going to shops
+        for shop in shops:
+            bought_procuct_titles = []
+            load_page(shop)
+            print(f"Going to shop {shop}")
+            load_elements()
+            titles =[elem.text for elem in driver.find_elements_by_xpath('//p[contains(@title," ")]')]
+
+            reload_products = False
+            if len(titles)>=15:
+                reload_products = True
+
+            product_cards = driver.find_elements_by_xpath('//p[contains(@title," ")]/ancestor::div[contains(@class,"overflow-hidden bg-white")]')
+            order_no = 0
+            #ordering products saperately
+            for i in range(len(product_cards)):
+                buy_button = product_cards[i].find_element_by_tag_name('button')
+                title = product_cards[i].find_element_by_tag_name('p').text
+
+                if title in titles:
+                    print(f"Ordering {title}")
+                    js_click(buy_button)
+                    place_order(address,road)
+                    titles.remove(title)
+                    order_no+=1
+                    product_cards = driver.find_elements_by_xpath('//p[contains(@title," ")]/ancestor::div[contains(@class,"overflow-hidden bg-white")]')
+    print("\nSuccessfuly orderd all the products form all the champaigns seperately")
+
+inpt = input("Enter the first word from the campaign name.\n")
+order_products_seperately_from_champaign_w_text(inpt)
